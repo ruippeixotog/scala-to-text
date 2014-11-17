@@ -1,7 +1,5 @@
 package net.ruippeixotog.scalatotext
 
-import net.ruippeixotog.scalatotext.engine.Engine._
-
 import scala.reflect.runtime.currentMirror
 import scala.tools.reflect.ToolBox
 
@@ -14,10 +12,12 @@ object Main extends App {
   val testCases = Vector(
     "class A(x: Int, y: String)",
     "case class B[T, U](x: Int, y: List[T])",
-    "case class B[T, U](x: Int, y: List[T]) { def stuff = y.length + x }")
+    "case class B[T, U](x: Int, y: List[T]) { def stuff = y.length + x }",
+    "case class B[M[_], U](x: Int, y: M[U]) { def stuff = x }")
 
   val tb = currentMirror.mkToolBox()
   val tree = tb.parse(testCases(args(0).toInt))
+  val renderer = new ScalaTextRenderer
 
-  println(tree.toText)
+  println(renderer.render(tree))
 }
