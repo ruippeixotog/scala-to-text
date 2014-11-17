@@ -39,6 +39,8 @@ class ScalaTextRenderer extends Renderer {
     tpt.render + tpts.renderTreeSeq(" of %s")
   }
 
+  def renderMods(mods: Modifiers) = if(mods.hasFlag(Flag.CASE)) "case " else ""
+
   // ClassDef(mods: Modifiers, tpname: TypeName, tparams: List[TypeDef],
   //   Template(parents: List[Tree], self: ValDef, stats: List[Tree]))
   // ----
@@ -48,12 +50,16 @@ class ScalaTextRenderer extends Renderer {
   // e.g. final class Foo[A] private(x: List[A]) extends Serializable { thiz => ... }
   //
   on { case q"$mods class $tpname[..$tparams] $ctorMods(...$paramss) extends { ..$_ } with ..$parents { $self => ..$stats }" =>
-    val filteredParents = parents.filterNot(_.toString.contains("AnyRef"))
+    val parentsToIgnore =
+      if(mods.hasFlag(Flag.CASE)) Seq("Product", "Serializable", "AnyRef")
+      else List("AnyRef")
+
+    val filteredParents = parents.filter { p => !parentsToIgnore.exists(p.toString.endsWith) }
 
     val parentsStr = filteredParents.renderTreeSeq("extends %s", "doesn't extend any class or trait")
     val tparamsStr = s"It receives ${tparams.renderTreeSeq("type parameters %s", "no type parameters")}."
     val paramssStr = s"It receives ${paramss.head.renderTreeSeq("parameters %s", "no parameters")}."
 
-    s"The class ${tpname.unCamelCase} $parentsStr. $tparamsStr $paramssStr"
+    s"The ${renderMods(mods)}class ${tpname.unCamelCase} $parentsStr. $tparamsStr $paramssStr"
   }
 }

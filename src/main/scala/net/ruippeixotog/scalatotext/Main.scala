@@ -11,9 +11,9 @@ object Main extends App {
 
   val testCases = Vector(
     "class A(x: Int, y: String)",
-    "case class B[T, U](x: Int, y: List[T])",
-    "case class B[T, U](x: Int, y: List[T]) { def stuff = y.length + x }",
-    "case class B[M[_], U](x: Int, y: M[U]) { def stuff = x }")
+    "class B[T, U](x: Int, y: List[T]) extends Serializable",
+    "case class C[T, U](x: Int, y: List[T]) { def stuff = y.length + x }",
+    "case class D[M[_], U](x: Int, y: M[U]) { def stuff = x }")
 
   val tb = currentMirror.mkToolBox()
   val tree = tb.parse(testCases(args(0).toInt))
